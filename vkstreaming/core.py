@@ -19,6 +19,17 @@ MAX_RULES = 10
 MAX_WORD_RULES = 10
 
 
+def getServerUrl(access_token, ver="5.67"):
+    """
+    :param access_token: Токен
+    Возвращает Хост для подключения к серверу и ключ доступа
+    """
+    url = "https://api.vk.com/method/streaming.getServerUrl?v=" + \
+        ver + "&access_token=" + access_token
+    response = requests.get(url).json()
+    return response["response"]
+
+
 class Streaming(object):
     """Класс"""
     def __init__(self, endpoint=None, key=None):
@@ -32,7 +43,7 @@ class Streaming(object):
         self.ws = ''
 
     def get_rules(self):
-        """Получение правил"""
+        """Возвращает правила в виде списка"""
 
         url = "https://{}/rules?key={}".format(self.endpoint, self.key)
 
@@ -48,6 +59,7 @@ class Streaming(object):
         """
         :param tag: Метка правила
         :param value: Cтроковое представление правила
+        Добавить правило `value` с меткой `tag`
         """
 
         url = "https://{}/rules?key={}".format(self.endpoint, self.key)
@@ -62,6 +74,7 @@ class Streaming(object):
     def del_rules(self, tag):
         """
         :param tag: Метка правила
+        Удалить правило с меткой `tag`
         """
 
         url = "https://{}/rules?key={}".format(self.endpoint, self.key)
@@ -80,23 +93,24 @@ class Streaming(object):
             for item in rules:
                 self.del_rules(item['tag'])
 
-    def update_rules(self, array):
+    def update_rules(self, list):
         """
-        :param array: Массив правил
+        :param list: Список правил
+        Удаляет все правила и добавляет правила из списка `list`
         """
-        if len(array) > MAX_RULES:
+        if len(list) > MAX_RULES:
             raise VkError(2006, "Too many rules")
         else:
             self.del_all_rules()
-            for item in array:
+            for item in list:
                 self.add_rules(item['tag'], item['value'])
 
     def stream(self, func):
-        """Декоратор"""
+        """Декоратор. Во время стриминга вызывает метод с событием."""
         self.list_func.append(func)
 
     def start(self):
-        """Запустить стрим"""
+        """Запустить стриминг"""
 
         def on_message(ws, message):
             """WebSocket получаем сообщение"""
@@ -124,7 +138,7 @@ class Streaming(object):
         self.ws.run_forever()
 
     def stop(self):
-        """Остановить стрим"""
+        """Остановить стриминг. Запускать в декорируемой функции"""
         self.ws.close()
 
 
