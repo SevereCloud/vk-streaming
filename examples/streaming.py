@@ -5,7 +5,7 @@ from vkstreaming import Streaming
 if __name__ == '__main__':
     api = Streaming("streaming.vk.com", "<key>")
 
-    api.del_all_rules
+    api.del_all_rules()
     api.add_rules("Котики", "кот")
 
     rules = api.get_rules()
