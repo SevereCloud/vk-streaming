@@ -1,4 +1,4 @@
-# vk streaming api 
+# Vk streaming api 
 
 Streaming API — это инструмент для получения публичных данных из ВКонтакте по заданным ключевым словам. 
 
@@ -8,7 +8,7 @@ Streaming API — это инструмент для получения публ
 
 С помощью Streaming API Вы можете получить не более 1% всех публичных данных, удовлетворяющих заданным правилам. Чтобы получить доступ к расширенной версии Streaming API, включающей 100% данных, пожалуйста, свяжитесь с vk по этому адресу e-mail: [api@vk.com](mailto:api@vk.com), указав в качестве темы «Streaming API». Обратите внимание, что документация соответствует базовой версии Streaming API, и некоторые возможности расширенной версии здесь не описаны.
 
-![Python 2.7, 3.4, 3.5, 3.6](https://img.shields.io/pypi/pyversions/vkstreaming.svg) ![v0.2](https://img.shields.io/pypi/v/vkstreaming.svg)
+![Python 2.7, 3.4, 3.5, 3.6](https://img.shields.io/pypi/pyversions/vkstreaming.svg) ![v0.2.1](https://img.shields.io/pypi/v/vkstreaming.svg)
 
 ## Установка
 
@@ -63,7 +63,7 @@ api = Streaming(response["endpoint"], response["key"])
 
 ```python
 >>> api.get_rules()
-[{"tag":"1","value":"коты"},{"tag":"2","value":"и"}]
+[{"tag":"1","value":"коты"}, {"tag":"2","value":"и"}]
 ```
 
 ### `add_rules(tag, value)`

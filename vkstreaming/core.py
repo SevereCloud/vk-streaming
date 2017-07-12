@@ -111,6 +111,7 @@ class Streaming(object):
 
     def start(self):
         """Запустить стриминг"""
+        er = False
 
         def on_message(ws, message):
             """WebSocket получаем сообщение"""
@@ -124,18 +125,33 @@ class Streaming(object):
 
         def on_error(ws, error):
             """WebSocket получаем ошибку"""
-            raise VkError(0, error)
+            nonlocal er
+            er = True
 
         def on_close(ws):
             """WebSocket закрыт"""
             pass
 
-        url = "wss://{}/stream?key={}".format(self.endpoint, self.key)
-        self.ws = websocket.WebSocketApp(url,
+        url = "://{}/stream?key={}".format(self.endpoint, self.key)
+        self.ws = websocket.WebSocketApp("wss" + url,
                                          on_message=on_message,
                                          on_error=on_error,
                                          on_close=on_close)
         self.ws.run_forever()
+
+        if er:
+            headers = {
+                "Connection": "upgrade",
+                "Upgrade": "websocket",
+                "Sec-Websocket-Version": "13"
+            }
+            response = requests.get("https" + url, headers=headers).json()
+
+            if response['code'] == 400:
+                raise VkError(response['error']['error_code'],
+                              response['error']['message'])
+            else:
+                self.start()
 
     def stop(self):
         """Остановить стриминг. Запускать в декорируемой функции"""
