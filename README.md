@@ -8,12 +8,18 @@ Streaming API — это инструмент для получения публ
 
 С помощью Streaming API Вы можете получить не более 1% всех публичных данных, удовлетворяющих заданным правилам. Чтобы получить доступ к расширенной версии Streaming API, включающей 100% данных, пожалуйста, свяжитесь с vk по этому адресу e-mail: [api@vk.com](mailto:api@vk.com), указав в качестве темы «Streaming API». Обратите внимание, что документация соответствует базовой версии Streaming API, и некоторые возможности расширенной версии здесь не описаны.
 
-![Python 2.7, 3.4, 3.5, 3.6](https://img.shields.io/pypi/pyversions/vkstreaming.svg) ![v0.2.1](https://img.shields.io/pypi/v/vkstreaming.svg)
+![Python 2, 3](https://img.shields.io/pypi/pyversions/vkstreaming.svg) ![v0.3](https://img.shields.io/pypi/v/vkstreaming.svg)
 
 ## Установка
 
 ```bash
 pip install vkstreaming
+```
+
+Обновить
+
+```bash
+pip install --upgrade vkstreaming
 ```
 
 ## Пример
@@ -55,6 +61,13 @@ response = getServerUrl(access_token)
 api = Streaming(response["endpoint"], response["key"])
 ```
 
+## Прокси
+
+```python
+response = getServerUrl(access_token, proxy_host, proxy_port)
+api = Streaming(response["endpoint"], response["key"], proxy_host, proxy_port)
+```
+
 ## Методы для работы с правилами
 
 ### `get_rules()`
@@ -85,6 +98,11 @@ api.add_rules("Навальный", "навальн")
 ### `upgrade_rules(list)`
 
 Удаляет все правила и добавляет правила из списка `list`
+
+```python
+list = [{"tag":"1","value":"коты"}, {"tag":"2","value":"и"}]
+api.upgrade_rules(list)
+```
 
 ## Стриминг
 

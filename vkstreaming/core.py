@@ -19,35 +19,46 @@ MAX_RULES = 10
 MAX_WORD_RULES = 10
 
 
-def getServerUrl(access_token, ver="5.67"):
+def getServerUrl(access_token, proxy_host=None, proxy_port=None, ver="5.67"):
     """
     :param access_token: Токен
     Возвращает Хост для подключения к серверу и ключ доступа
     """
+    proxies = None
+    if proxy_host:
+        proxies = {'https': proxy_host+':'+str(proxy_port)}
+
     url = "https://api.vk.com/method/streaming.getServerUrl?v=" + \
         ver + "&access_token=" + access_token
-    response = requests.get(url).json()
+    response = requests.get(url, proxies=proxies).json()
     return response["response"]
 
 
 class Streaming(object):
     """Класс"""
-    def __init__(self, endpoint=None, key=None):
+    def __init__(self, endpoint, key, proxy_host=None, proxy_port=None):
         """
         :param endpoint: Хост для подключения к серверу
         :param key: Ключ доступа
+        :param proxy_host: Прокси хост
+        :param proxy_port: Прокси порт
         """
         self.endpoint = endpoint
         self.key = key
+        self.proxies = None
+        if proxy_host:
+            self.proxies = {'https': proxy_host+':'+str(proxy_port)}
+        self.proxy_host = proxy_host
+        self.proxy_port = int(proxy_port)
         self.list_func = []
-        self.ws = ''
+        self.ws = None
 
     def get_rules(self):
         """Возвращает правила в виде списка"""
 
         url = "https://{}/rules?key={}".format(self.endpoint, self.key)
 
-        response = requests.get(url).json()
+        response = requests.get(url, proxies=self.proxies).json()
 
         if response['code'] != 200:
             raise VkError(response['error']['error_code'],
@@ -65,7 +76,7 @@ class Streaming(object):
         url = "https://{}/rules?key={}".format(self.endpoint, self.key)
         values = {"rule": {"value": value, "tag": tag}}
 
-        response = requests.post(url, json=values).json()
+        response = requests.post(url, json=values, proxies=self.proxies).json()
 
         if response['code'] != 200:
             raise VkError(response['error']['error_code'],
@@ -80,7 +91,8 @@ class Streaming(object):
         url = "https://{}/rules?key={}".format(self.endpoint, self.key)
         values = {"tag": tag}
 
-        response = requests.delete(url, json=values).json()
+        response = requests.delete(url, json=values, 
+                                   proxies=self.proxies).json()
 
         if response['code'] != 200:
             raise VkError(response['error']['error_code'],
@@ -125,7 +137,7 @@ class Streaming(object):
 
         def on_error(ws, error):
             """WebSocket получаем ошибку"""
-            nonlocal er
+            
             er = True
 
         def on_close(ws):
@@ -133,11 +145,20 @@ class Streaming(object):
             pass
 
         url = "://{}/stream?key={}".format(self.endpoint, self.key)
-        self.ws = websocket.WebSocketApp("wss" + url,
-                                         on_message=on_message,
-                                         on_error=on_error,
-                                         on_close=on_close)
-        self.ws.run_forever()
+        if self.proxies:
+            self.ws = websocket.WebSocketApp("wss" + url,
+                                             on_message=on_message,
+                                             on_error=on_error,
+                                             on_close=on_close
+                                             )
+        else:
+            self.ws = websocket.WebSocketApp("wss" + url,
+                                             on_message=on_message,
+                                             on_error=on_error,
+                                             on_close=on_close
+                                             )
+        self.ws.run_forever(http_proxy_host=self.proxy_host,
+                            http_proxy_port=self.proxy_port)
 
         if er:
             headers = {
@@ -145,7 +166,8 @@ class Streaming(object):
                 "Upgrade": "websocket",
                 "Sec-Websocket-Version": "13"
             }
-            response = requests.get("https" + url, headers=headers).json()
+            response = requests.get("https" + url, headers=headers,
+                                    proxies=self.proxies).json()
 
             if response['code'] == 400:
                 raise VkError(response['error']['error_code'],
