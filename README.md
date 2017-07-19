@@ -95,13 +95,13 @@ api.add_rules("Навальный", "навальн")
 
 Удаляет все правила
 
-### `upgrade_rules(list)`
+### `update_rules(list)`
 
 Удаляет все правила и добавляет правила из списка `list`
 
 ```python
 list = [{"tag":"1","value":"коты"}, {"tag":"2","value":"и"}]
-api.upgrade_rules(list)
+api.update_rules(list)
 ```
 
 ## Стриминг
@@ -127,8 +127,6 @@ def func(event):
 
 ## Обработка исключений
 
-[Список ошибок](https://vk.com/dev/streaming_api_docs_2?f=8.%20Сообщения%20об%20ошибках)
-
 ```python
 try:
     ...
@@ -136,4 +134,23 @@ except VkError as e:
     print(e.error_code) #Код ошибки
     print(e.message) #Сообщение
 ```
+
+[Список ошибок](https://vk.com/dev/streaming_api_docs_2?f=8.%20Сообщения%20об%20ошибках)
+
+| error_code | message                        | Описание                                                                |
+|------------|--------------------------------|-------------------------------------------------------------------------|
+| 1000       | Upgrade to websocket expected  | Неверно переданы параметры для обновления соединения до WebSocket       |
+| 1001       | Wrong http method              | Неподдерживаемый HTTP-метод                                             |
+| 1002       | Wrong content type             | Ключ “Content-type” либо отсутствует, либо не равен ожидаемому значению |
+| 1003       | Missing key                    | Отсутствует параметр "key"                                              |
+| 1004       | Bad key                        | Неправильное значение параметра "key"                                   |
+| 1005       | Bad stream id                  | Недопустимое значение параметра "stream_id" (для расширенной версии)    |
+| 1006       | Connection already established | Такое соединение уже установлено                                        |
+| 2000       | Can't parse json               | Не удалось распарсить JSON в теле запроса                               |
+| 2001       | Tag already exist              | Правило с таким tag уже присутствует в этом потоке                      |
+| 2002       | Tag not exist                  | Правило с таким tag отсутствует в этом потоке                           |
+| 2003       | Can't parse rule               | Не удалось распарсить содержимое rule                                   |
+| 2004       | Too many filters               | Слишком много фильтров в одном правиле                                  |
+| 2005       | Unbalanced quotes              | Непарные кавычки                                                        |
+| 2006       | Too many rules                 | Слишком много правил в этом потоке                                      |
 

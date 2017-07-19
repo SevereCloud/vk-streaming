@@ -31,6 +31,9 @@ def getServerUrl(access_token, proxy_host=None, proxy_port=None, ver="5.67"):
     url = "https://api.vk.com/method/streaming.getServerUrl?v=" + \
         ver + "&access_token=" + access_token
     response = requests.get(url, proxies=proxies).json()
+    if 'error' in response:
+        raise VkError(response['error']['error_code'],
+                      response['error']['error_msg'])
     return response["response"]
 
 
@@ -45,11 +48,14 @@ class Streaming(object):
         """
         self.endpoint = endpoint
         self.key = key
+
         self.proxies = None
-        if proxy_host:
-            self.proxies = {'https': proxy_host+':'+str(proxy_port)}
         self.proxy_host = proxy_host
-        self.proxy_port = int(proxy_port)
+        self.proxy_port = None
+        if proxy_port:
+            self.proxies = {'https': proxy_host+':'+str(proxy_port)}
+            self.proxy_port = int(proxy_port)
+        
         self.list_func = []
         self.ws = None
 
@@ -105,16 +111,16 @@ class Streaming(object):
             for item in rules:
                 self.del_rules(item['tag'])
 
-    def update_rules(self, list):
+    def update_rules(self, array):
         """
-        :param list: Список правил
-        Удаляет все правила и добавляет правила из списка `list`
+        :param array: Список правил
+        Удаляет все правила и добавляет правила из списка `array`
         """
-        if len(list) > MAX_RULES:
+        if len(array) > MAX_RULES:
             raise VkError(2006, "Too many rules")
         else:
             self.del_all_rules()
-            for item in list:
+            for item in array:
                 self.add_rules(item['tag'], item['value'])
 
     def stream(self, func):
