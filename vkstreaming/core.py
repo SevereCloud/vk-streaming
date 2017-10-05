@@ -10,16 +10,17 @@ import websocket
 
 
 """
-максимальное количество правил — 10;
-максимальное количество ключевых слов в правиле — 10;
+максимальное количество правил — 300;
+максимальное количество ключевых слов в правиле — 100;
 максимальный размер правила в байтах — 4096;
 максимальный размер метки правила (tag) в байтах — 256;
 """
-MAX_RULES = 10
-MAX_WORD_RULES = 10
+MAX_RULES = 300
+MAX_WORD_RULES = 100
+VER = "5.68"
 
 
-def getServerUrl(access_token, proxy_host=None, proxy_port=None, ver="5.67"):
+def getServerUrl(access_token, proxy_host=None, proxy_port=None, ver=VER):
     """
     :param access_token: Токен
     Возвращает Хост для подключения к серверу и ключ доступа
@@ -36,6 +37,28 @@ def getServerUrl(access_token, proxy_host=None, proxy_port=None, ver="5.67"):
                       response['error']['error_msg'])
     return response["response"]
 
+
+def getStats(access_token, type, interval, start_time, end_time,
+             proxy_host=None, proxy_port=None, ver=VER):
+    """
+    :param access_token: Токен
+    :param type: Тип статистики
+    :param interval: Интервалы статистики
+    :param start_time: Время начала отсчёта в Unixtime
+    :param end_time: Время окончания отсчёта в Unixtime
+    Позволяет получить статистику для подготовленных и доставленных событий Streaming API
+    """
+    proxies = None
+    if proxy_host:
+        proxies = {'https': proxy_host+':'+str(proxy_port)}
+    url = "https://api.vk.com/method/streaming.getStats?type="+ type + \
+    "&interval=" + interval + "&start_time=" + start_time + \
+    "&end_time=" + end_time + "&v=" + ver + "&access_token=" + access_token
+    response = requests.get(url, proxies=proxies).json()
+    if 'error' in response:
+        raise VkError(response['error']['error_code'],
+                      response['error']['error_msg'])
+    return response["response"]
 
 class Streaming(object):
     """Класс"""
@@ -55,7 +78,7 @@ class Streaming(object):
         if proxy_port:
             self.proxies = {'https': proxy_host+':'+str(proxy_port)}
             self.proxy_port = int(proxy_port)
-        
+
         self.list_func = []
         self.ws = None
 
@@ -97,7 +120,7 @@ class Streaming(object):
         url = "https://{}/rules?key={}".format(self.endpoint, self.key)
         values = {"tag": tag}
 
-        response = requests.delete(url, json=values, 
+        response = requests.delete(url, json=values,
                                    proxies=self.proxies).json()
 
         if response['code'] != 200:
@@ -143,7 +166,6 @@ class Streaming(object):
 
         def on_error(ws, error):
             """WebSocket получаем ошибку"""
-            
             er = True
 
         def on_close(ws):
@@ -151,20 +173,16 @@ class Streaming(object):
             pass
 
         url = "://{}/stream?key={}".format(self.endpoint, self.key)
+        self.ws = websocket.WebSocketApp("wss" + url,
+                                         on_message=on_message,
+                                         on_error=on_error,
+                                         on_close=on_close
+                                        )
         if self.proxies:
-            self.ws = websocket.WebSocketApp("wss" + url,
-                                             on_message=on_message,
-                                             on_error=on_error,
-                                             on_close=on_close
-                                             )
+            self.ws.run_forever()
         else:
-            self.ws = websocket.WebSocketApp("wss" + url,
-                                             on_message=on_message,
-                                             on_error=on_error,
-                                             on_close=on_close
-                                             )
-        self.ws.run_forever(http_proxy_host=self.proxy_host,
-                            http_proxy_port=self.proxy_port)
+            self.ws.run_forever(http_proxy_host=self.proxy_host,
+                                http_proxy_port=self.proxy_port)
 
         if er:
             headers = {
