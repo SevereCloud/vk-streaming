@@ -19,6 +19,7 @@ Streaming API — это инструмент для получения публ
 >6. В объектах событий добавлены вложения. 
 
 ![Python 2, 3](https://img.shields.io/pypi/pyversions/vkstreaming.svg?style=flat-square) ![v0.4](https://img.shields.io/pypi/v/vkstreaming.svg?style=flat-square)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FSevereCloud%2Fvk-streaming.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FSevereCloud%2Fvk-streaming?ref=badge_shield)
 
 ## Установка
 
@@ -185,3 +186,7 @@ except VkError as e:
 | 2005       | Unbalanced quotes                      | Непарные кавычки                                                        |
 | 2006       | Too many rules                         | Слишком много правил в этом потоке                                      |
 | 2008	     | At least one positive filter should be | Должно быть хотя бы одно ключевое слово без минуса                      |
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FSevereCloud%2Fvk-streaming.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2FSevereCloud%2Fvk-streaming?ref=badge_large)
